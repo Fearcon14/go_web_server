@@ -27,8 +27,8 @@ go.work
 go.work.sum
 
 # Compiled binaries
-cmd/**/server
-cmd/**/server.exe
+cmd/server/server
+!cmd/**/*.go
 
 # env file
 .env
