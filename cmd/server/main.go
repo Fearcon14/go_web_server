@@ -3,11 +3,14 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/Fearcon14/go_web_server/cmd/internal/handlers"
 )
 
 func main() {
 	serveMux := http.NewServeMux()
-	serveMux.Handle("/", http.FileServer(http.Dir("../../web")))
+	serveMux.HandleFunc("/healthz", handlers.ReadinessHandler)
+	serveMux.Handle("/app/", http.StripPrefix("/app", http.FileServer(http.Dir("../../web"))))
 
 	server := &http.Server{
 		Handler: serveMux,
