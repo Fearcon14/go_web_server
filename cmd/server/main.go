@@ -4,13 +4,20 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Fearcon14/go_web_server/cmd/internal/config"
 	"github.com/Fearcon14/go_web_server/cmd/internal/handlers"
+	"github.com/Fearcon14/go_web_server/cmd/internal/middleware"
 )
 
 func main() {
+	cfg := &config.ApiConfig{}
+
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/healthz", handlers.ReadinessHandler)
-	serveMux.Handle("/app/", http.StripPrefix("/app", http.FileServer(http.Dir("../../web"))))
+	serveMux.HandleFunc("/metrics", handlers.MetricsHandler(cfg))
+	serveMux.HandleFunc("/reset", handlers.ResetMetricsHandler(cfg))
+
+	serveMux.Handle("/app/", middleware.MiddlewareMetricsInc(cfg)(http.StripPrefix("/app", http.FileServer(http.Dir("../../web")))))
 
 	server := &http.Server{
 		Handler: serveMux,
