@@ -4,16 +4,19 @@ import (
 	"net/http"
 
 	"encoding/json"
+	"strings"
 )
 
 type ChirpResponse struct {
-	Error string `json:"error"`
-	Valid bool   `json:"valid"`
+	Error        string `json:"error"`
+	Cleaned_Body string `json:"cleaned_body"`
 }
 
 type ChirpRequest struct {
 	Body string `json:"body"`
 }
+
+var profanityList = []string{"kerfuffle", "sharbert", "fornax"}
 
 func ValidateChirpHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -31,13 +34,13 @@ func ValidateChirpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	respondWithJSON(w, http.StatusOK, ChirpResponse{Error: "", Valid: true})
+	cleanedBody := removeProfanity(chirpRequest.Body)
+	respondWithJSON(w, http.StatusOK, ChirpResponse{Error: "", Cleaned_Body: cleanedBody})
 
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
-	data, err := json.Marshal(ChirpResponse{Error: message, Valid: false})
+	data, err := json.Marshal(ChirpResponse{Error: message, Cleaned_Body: ""})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -54,4 +57,16 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.WriteHeader(code)
 	w.Write(data)
+}
+
+func removeProfanity(body string) string {
+	splitBody := strings.Split(body, " ")
+	for i, word := range splitBody {
+		for _, profanity := range profanityList {
+			if strings.ToLower(word) == strings.ToLower(profanity) {
+				splitBody[i] = "****"
+			}
+		}
+	}
+	return strings.Join(splitBody, " ")
 }
