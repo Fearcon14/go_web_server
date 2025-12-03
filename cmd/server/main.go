@@ -14,8 +14,8 @@ func main() {
 
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("GET /api/healthz", handlers.ReadinessHandler)
-	serveMux.HandleFunc("GET /api/metrics", handlers.MetricsHandler(cfg))
-	serveMux.HandleFunc("POST /api/reset", handlers.ResetMetricsHandler(cfg))
+	serveMux.HandleFunc("GET /admin/metrics", handlers.MetricsHandler(cfg))
+	serveMux.HandleFunc("POST /admin/reset", handlers.ResetMetricsHandler(cfg))
 
 	serveMux.Handle("/app/", middleware.MiddlewareMetricsInc(cfg)(http.StripPrefix("/app", http.FileServer(http.Dir("../../web")))))
 
