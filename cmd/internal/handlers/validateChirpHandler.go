@@ -63,7 +63,7 @@ func removeProfanity(body string) string {
 	splitBody := strings.Split(body, " ")
 	for i, word := range splitBody {
 		for _, profanity := range profanityList {
-			if strings.ToLower(word) == strings.ToLower(profanity) {
+			if strings.EqualFold(word, profanity) {
 				splitBody[i] = "****"
 			}
 		}
