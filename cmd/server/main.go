@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/Fearcon14/go_web_server/cmd/internal/config"
 	"github.com/Fearcon14/go_web_server/cmd/internal/handlers"
@@ -10,7 +11,16 @@ import (
 )
 
 func main() {
-	cfg := &config.ApiConfig{}
+	// Load database connection string from environment variable
+	// Default to your local connection string if not set
+	dbConnection := os.Getenv("DB_CONNECTION")
+	if dbConnection == "" {
+		dbConnection = "postgres://ksinn:@localhost:5432/chirpy"
+	}
+
+	cfg := &config.ApiConfig{
+		DatabaseConnection: dbConnection,
+	}
 
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("GET /api/healthz", handlers.ReadinessHandler)
