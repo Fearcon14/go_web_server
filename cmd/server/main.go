@@ -1,25 +1,38 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/Fearcon14/go_web_server/cmd/internal/config"
+	"github.com/Fearcon14/go_web_server/cmd/internal/database"
 	"github.com/Fearcon14/go_web_server/cmd/internal/handlers"
 	"github.com/Fearcon14/go_web_server/cmd/internal/middleware"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	// Load .env file from current working directory (project root)
+	godotenv.Load(".env")
 	// Load database connection string from environment variable
-	// Default to your local connection string if not set
-	dbConnection := os.Getenv("DB_CONNECTION")
-	if dbConnection == "" {
-		dbConnection = "postgres://ksinn:@localhost:5432/chirpy"
+	dbURL := os.Getenv("DB_URL")
+
+	// Open database connection
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal("Failed to open database connection:", err)
 	}
 
+	// Create database queries instance
+	dbQueries := database.New(db)
+
 	cfg := &config.ApiConfig{
-		DatabaseConnection: dbConnection,
+		DatabaseConnection: dbURL,
+		DB:                 dbQueries,
 	}
 
 	serveMux := http.NewServeMux()
